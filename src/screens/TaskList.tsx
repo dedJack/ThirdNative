@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+  Alert,
   FlatList,
   Modal,
   StyleSheet,
@@ -8,11 +9,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Animated, {FadeInLeft, FadeOutUp, Layout} from 'react-native-reanimated';
 import {useDispatch, useSelector} from 'react-redux';
-import {addTodo, removeTodo} from '../store/taskSlice';
-import {Tasks} from '../store/taskSlice';
-import {RootState} from '../store/store';
-import Animated, {FadeInLeft, FadeOutRight} from 'react-native-reanimated';
+import {AppDispatch, RootState} from '../store/store';
+import {deleteTask, fetchTasks, getTask, Task} from '../store/taskSlice';
 
 const TaskList: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -20,29 +20,67 @@ const TaskList: React.FC = () => {
 
   //TO send the value from reducer to store.
   //It will need reducer.
-  const dispatch = useDispatch();
-
-  const handleAddTodo = () => {
-    if (inputValue.trim()) {
-      dispatch(addTodo(inputValue));
-      setInputValue('');
-      setModalVisible(false);
-    }
-  };
+  const dispatch = useDispatch<AppDispatch>();
 
   //To get the value from state.
-  const todoList = useSelector((state: RootState) => state.tasks);
+  const task = useSelector((state: RootState) => state.tasks.tasks);
 
+  const handleAddTask = () => {
+    dispatch(
+      getTask({
+        description: inputValue,
+        completed: false,
+      }),
+    );
+    setInputValue('');
+    setModalVisible(false);
+  };
 
+  const handleDelete = (taskId: string) => {
+    Alert.alert(
+      'Delete Task', // Title
+      'Do you want to delete this task?', // Message
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: () => {
+            dispatch(deleteTask(taskId));
+          },
+          style: 'destructive',
+        },
+      ],
+    );
+  };
 
-  const createRenderTask = ({item}: {item: Tasks}) => (
-    <Animated.View entering={FadeInLeft} exiting={FadeOutRight} 
-    style={styles.container1} >
-      <Text> {item.text}</Text>
+  useEffect(() => {
+    dispatch(fetchTasks());
+  }, []);
+
+  const createRenderTask = ({item}: {item: Task}) => (
+    <Animated.View
+      entering={FadeInLeft}
+      exiting={FadeOutUp}
+      layout={Layout.springify()}
+      style={styles.container1}>
+      <TouchableOpacity style={{flex: 1}}>
+        <Text style={{fontSize: 16, fontWeight: '500'}}>
+          {item.description}
+        </Text>
+      </TouchableOpacity>
+
       <TouchableOpacity
-        style={[styles.addBtn,{bottom:0,right:0}]}
-        onPress={()=>dispatch(removeTodo(item.id))}>
-        <Text style={styles.addBtnText}>Remove</Text>
+        style={{
+          backgroundColor: '#e74c3c',
+          paddingVertical: 6,
+          paddingHorizontal: 12,
+          borderRadius: 20,
+        }}
+        onPress={() => handleDelete(item.id)}>
+        <Text style={{color: 'white', fontWeight: 'bold'}}>Remove</Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -51,17 +89,17 @@ const TaskList: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.header}>Tasks</Text>
       <FlatList
-        data={todoList}
+        data={task}
         renderItem={createRenderTask}
         keyExtractor={item => item.id}
       />
-      
+
       <TouchableOpacity
         style={styles.addBtn}
         onPress={() => setModalVisible(true)}>
         <Text style={styles.addBtnText}>Add</Text>
       </TouchableOpacity>
-      
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -84,8 +122,8 @@ const TaskList: React.FC = () => {
                 <Text style={styles.btnText}>cancle</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={handleAddTodo}
-                style={[styles.cancleBtn, {backgroundColor: 'green'}]}>
+                style={[styles.cancleBtn, {backgroundColor: 'green'}]}
+                onPress={handleAddTask}>
                 <Text style={styles.btnText}>Add Task</Text>
               </TouchableOpacity>
             </View>
@@ -174,12 +212,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   container1: {
-    marginBottom: 5,
-    borderWidth: 0.5,
-    borderRadius: 5,
-    marginHorizontal: 5,
-    paddingHorizontal: 5,
-    paddingVertical: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 15,
+    marginVertical: 5,
+    marginHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderLeftWidth: 5,
+    borderLeftColor: '#8e44ad', // nice purple accent
   },
 });
 
