@@ -19,14 +19,25 @@ A simple and intuitive Todo application built using **React Native** and **Redux
 
 ## 📂 Project Structure
 
-/TodoApp ├── /src │ ├── /navigation │ │ └── RootNavigation.tsx │ ├── /screens │ │ └── TaskList.tsx │ └── /store │ ├── store.ts │ └── taskSlice.ts ├── package.json └── README.md
+/ThirdNative
+├── package.json
+├── README.md
+└── /src
+    ├── /navigation
+    │   └── RootNavigation.tsx
+    ├── /screens
+    │   └── TaskList.tsx
+    └── /store
+        ├── store.ts
+        └── taskSlice.ts
+
 
 
 ## ⚙️ Installation
 
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/yourusername/ThirdNative.git
+   git clone https://github.com/dedJack/ThirdNative.git
    cd ThirdNative
    
 2. Install dependencies
