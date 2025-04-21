@@ -12,7 +12,7 @@ import {
 import Animated, {FadeInLeft, FadeOutUp, Layout} from 'react-native-reanimated';
 import {useDispatch, useSelector} from 'react-redux';
 import {AppDispatch, RootState} from '../store/store';
-import {deleteTask, fetchTasks, getTask, Task} from '../store/taskSlice';
+import {deleteTask, fetchTasks, getTask, Task, toggleTask} from '../store/taskSlice';
 
 const TaskList: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -66,8 +66,8 @@ const TaskList: React.FC = () => {
       exiting={FadeOutUp}
       layout={Layout.springify()}
       style={styles.container1}>
-      <TouchableOpacity style={{flex: 1}}>
-        <Text style={{fontSize: 16, fontWeight: '500'}}>
+      <TouchableOpacity style={[styles.tastitem, item.completed&&styles.completedTask]} onPress={()=>dispatch(toggleTask(item.id))}>
+        <Text style={[item.completed&&styles.completedTaskText,{fontSize: 16, fontWeight: '500'}]}>
           {item.description}
         </Text>
       </TouchableOpacity>
@@ -75,8 +75,8 @@ const TaskList: React.FC = () => {
       <TouchableOpacity
         style={{
           backgroundColor: '#e74c3c',
-          paddingVertical: 6,
-          paddingHorizontal: 12,
+          paddingVertical: 10,
+          paddingHorizontal: 15,
           borderRadius: 20,
         }}
         onPress={() => handleDelete(item.id)}>
@@ -217,9 +217,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 15,
-    marginVertical: 5,
-    marginHorizontal: 10,
+    marginVertical:8,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.1,
@@ -228,6 +226,18 @@ const styles = StyleSheet.create({
     borderLeftWidth: 5,
     borderLeftColor: '#8e44ad', // nice purple accent
   },
+  tastitem:{
+    padding:15,
+    flex:1,
+  },
+  completedTask:{
+    backgroundColor:"lightgrey",
+    borderRadius: 12,
+
+  },
+  completedTaskText:{
+    textDecorationLine:"line-through"
+  }
 });
 
 export default TaskList;

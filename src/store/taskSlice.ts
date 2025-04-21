@@ -72,6 +72,24 @@ export const deleteTask = createAsyncThunk(
   },
 );
 
+export const toggleTask = createAsyncThunk(
+  'tasks/toggleTask',
+  async (taskId: string, {getState}) => {
+    const state = getState() as {tasks: TaskState};
+    const task = state.tasks.tasks.find(taskItem => taskItem.id === taskId);
+
+    if (task) {
+      const updateTask = {...task, completed: !task.completed};
+      const updatedTasks = state.tasks.tasks.map(item =>
+        item.id === taskId ? updateTask : item,
+      );
+      await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
+      return updateTask;
+    }
+    throw new Error('task not found');
+  },
+);
+
 export const taskSlice = createSlice({
   name: 'tasks',
   initialState,
@@ -94,6 +112,14 @@ export const taskSlice = createSlice({
       })
       .addCase(deleteTask.fulfilled, (state, action: PayloadAction<string>) => {
         state.tasks = state.tasks.filter(item => item.id !== action.payload);
+      })
+      .addCase(toggleTask.fulfilled, (state, action: PayloadAction<Task>) => {
+        const index = state.tasks.findIndex(
+          item => item.id === action.payload.id,
+        );
+        if (index !== -1) {
+          state.tasks[index] = action.payload;
+        }
       });
   },
 });
